@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  ACR_NAME: churnappregistry
+  IMAGE_NAME: churn-prediction-app
+  RESOURCE_GROUP: churnappRG
+  CLUSTER_NAME: churnappAKS
+  NAMESPACE: default
+
+stages:
+- stage: BuildAndPush
+  displayName: Build & Push Docker Image to ACR
+  jobs:
+  - job: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'churnapp_devops_connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az acr login --name $ACR_NAME
+          docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest .
+          docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
+
+- stage: Deploy
+  displayName: Deploy to AKS
+  dependsOn: BuildAndPush
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'churnapp_devops_connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+          kubectl rollout restart deployment churn-predict-deployment --namespace $NAMESPACE
