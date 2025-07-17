@@ -23,7 +23,7 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Model files or data (if large or unnecessary)
-*.pkl
+# *.pkl
 *.h5
 *.joblib
 # *.csv

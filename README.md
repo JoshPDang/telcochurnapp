@@ -139,8 +139,26 @@ kubectl get svc -n default
 ```
 kubectl port-forward svc/monitoring-grafana 3000:80
 ```
+![Grafana Dashboard](img/grafana_dashboards_node.png)
 
-## CI/CD:
-- create new project in Azure Devops:
-- create a new connection to your resources
-- create a new repo, and push your code
+### 4.5 CI/CD:
+- Create new project in Azure Devops:
+![Devops: Create new project](img/devops_create_new_project.png)
+- Create a new repo, and push your code
+![Devops: Create new repo and push code](img/devops_create_new_repo.png)
+- Create a new connection to your resources:
+![Devops: Create new service connection](img/devops_create_service_connection_1.png)
+![Devops: Create new service connection](img/devops_create_service_connection_2.png)
+- Create an agent pool: if your Azure subscription comes with a paid Microsoft hosted agent pool, you can use it. In this project, I'll show how to generate a self-hosted agent. Create n agent pool in Organization Setting (NOT Project Setting ):
+![Devops: Create agent pool](img/devops_create_agent_pool_1.png)
+- Select your system and follow the instructions to install the agent:
+![Devops: Create agent pool](img/devops_create_agent_pool_2.png)
+- You may be prompted with some questions during the installation process.
+![Devops: Create agent pool](img/devops_create_agent_pool_3.png)
+
+- Create a new pipeline:
+
+![Devops: Create new pipeline](img/devops_create_new_pipeline_1.png)
+![Devops: Create new pipeline](img/devops_create_new_pipeline_2.png)
+![Devops: Create new pipeline](img/devops_create_new_pipeline_3.png)
+
