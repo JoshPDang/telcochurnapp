@@ -15,5 +15,6 @@ spec:
       containers:
       - name: churn-app
         image: churnappregistry.azurecr.io/churn-prediction-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
