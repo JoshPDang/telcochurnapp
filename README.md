@@ -162,3 +162,5 @@ kubectl port-forward svc/monitoring-grafana 3000:80
 ![Devops: Create new pipeline](img/devops_create_new_pipeline_2.png)
 ![Devops: Create new pipeline](img/devops_create_new_pipeline_3.png)
 
+- Your pipeline should be ready for deployment:
+![CI/CD Ready](img/devops_pipeline_ready.png)
