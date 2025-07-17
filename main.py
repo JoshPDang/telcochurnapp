@@ -1,35 +1,13 @@
 import os
 import pickle
 import pandas as pd
-from fastapi import FastAPI, HTTPException
-from fastapi.encoders import jsonable_encoder
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse
 from loguru import logger
-from pydantic import BaseModel
+from typing import List
+from io import StringIO
 
 app = FastAPI()
-
-class TelcoFeatures(BaseModel):
-    customerID: str = "1234-ABCD"
-    gender: str = "Male"
-    SeniorCitizen: int = 0
-    Partner: str = "Yes"
-    Dependents: str = "Yes"
-    tenure: int = 72
-    PhoneService: str = "Yes"
-    MultipleLines: str = "Yes"
-    InternetService: str = "Fiber optic"
-    OnlineSecurity: str = "Yes"
-    OnlineBackup: str = "Yes"
-    DeviceProtection: str = "Yes"
-    TechSupport: str = "Yes"
-    StreamingTV: str = "Yes"
-    StreamingMovies: str = "Yes"
-    Contract: str = "Two year"
-    PaperlessBilling: str = "No"
-    PaymentMethod: str = "Bank transfer (automatic)"
-    MonthlyCharges: float = 89.10
-    TotalCharges: str = "6400.55"
-    Churn: str = "No"
 
 # Load model and preprocessor
 model_path = os.path.join(os.path.dirname(__file__), 'model', 'xgb_churn_pipeline.pkl')
@@ -49,25 +27,35 @@ def check_health():
     return {"status": "ok"}
 
 @app.post("/predict")
-def predict(data: TelcoFeatures):
-    try:
-        # Convert input to DataFrame
-        input_dict = jsonable_encoder(data)
-        df = pd.DataFrame([input_dict])
+async def predict_from_csv(file: UploadFile = File(...)):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File must be a CSV.")
 
-        # Fix TotalCharges to float
+    try:
+        contents = await file.read()
+        df = pd.read_csv(StringIO(contents.decode()))
+
+        # Ensure required columns are present
+        required_cols = {"customerID", "TotalCharges", "Churn"}
+        if not required_cols.issubset(df.columns):
+            raise HTTPException(status_code=400, detail=f"Missing required columns: {required_cols - set(df.columns)}")
+
+        # Preprocessing
         df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
         df['TotalCharges'] = df['TotalCharges'].fillna(df['TotalCharges'].median())
 
-        # Drop unused columns
+        customer_ids = df['customerID']
         df = df.drop(columns=["customerID", "Churn"])
 
-        # Preprocess
         X_transformed = preprocessor.transform(df)
+        predictions = model.predict(X_transformed)
 
-        # Predict
-        prediction = model.predict(X_transformed)[0]
-        return {"Churn": "Yes" if prediction == 1 else "No"}
+        result_df = pd.DataFrame({
+            "customerID": customer_ids,
+            "ChurnPrediction": ["Yes" if p == 1 else "No" for p in predictions]
+        })
+
+        return JSONResponse(content=result_df.to_dict(orient="records"))
 
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
