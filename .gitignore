@@ -35,3 +35,9 @@ Thumbs.db
 
 # Azure Pipelines externals folder
 /externals/
+
+#sh file:
+*.sh
+
+#gitignore
+.gitignore
