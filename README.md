@@ -8,8 +8,11 @@ The dataset used in this project is the [Telco Customer Churn dataset](https://w
 
 This dataset provides a realistic view of subscription-based service behavior and is widely used for churn prediction modeling. It serves as a valuable foundation for exploring classification algorithms, feature engineering, and end-to-end deployment workflows.
 
-## 3. Architecture
+## 3. System Architecture
 
+This architecture illustrates the CI/CD workflow for a Telco Churn Prediction app. A data scientist builds and trains a model in Jupyter Notebook, which is then containerized and pushed to Azure Container Registry (ACR). Azure DevOps automates the deployment to Azure Kubernetes Service (AKS), which in turn deploys the application to an Azure Web App. End users can upload a CSV file through the web interface to receive churn predictions.
+
+![System Architecture](img/System_Architecture.png)
 
 ## 4. Implementation:
 
